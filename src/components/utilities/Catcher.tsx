@@ -1,0 +1,59 @@
+
+
+import React, { ErrorInfo } from 'react';
+
+import { Text } from '../basic/Text';
+import { Container } from '../layout/Container';
+
+interface CatcherProps {
+	/** error callback, use this to perform operations when an error is caught */
+	onError?: (error: Error, errorInfo: ErrorInfo) => void;
+}
+
+interface CatcherState {
+	hasError: boolean;
+	error: Error | null;
+}
+
+class Catcher extends React.Component<CatcherProps, CatcherState> {
+	constructor(props: CatcherProps) {
+		super(props);
+		this.state = {
+			hasError: false,
+			error: null
+		};
+	}
+
+	componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
+		// You can also log the error to an error reporting service
+		// eslint-disable-next-line no-console
+		const { onError = console.error } = this.props;
+		if (onError) {
+			onError(error, errorInfo);
+		}
+		this.setState({
+			hasError: true,
+			error
+		});
+	}
+
+	render(): React.ReactNode {
+		//@ts-ignore
+		const { children } = this.props;
+		const { hasError, error } = this.state;
+		if (hasError) {
+			// You can render any custom fallback UI
+			return (
+				<Container>
+					<Text size="large" color="error">
+						{error?.message}
+					</Text>
+				</Container>
+			);
+		}
+
+		return children;
+	}
+}
+
+export { Catcher, CatcherProps };
